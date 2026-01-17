@@ -5,6 +5,7 @@ import Sidebar from './components/Sidebar';
 import Editor from './components/Editor';
 import HistoryPanel from './components/HistoryPanel';
 import PrintPreview from './components/PrintPreview';
+import { saveProjectState, loadHistory, restoreProjectState } from './utils/storage';
 
 const App: React.FC = () => {
   const [images, setImages] = useState<LocketImage[]>([]);
@@ -14,11 +15,18 @@ const App: React.FC = () => {
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem('locket_history');
+    const saved = loadHistory();
     if (saved) {
-      setHistory(JSON.parse(saved));
+      setHistory(saved);
     }
   }, []);
+
+  // Auto-save project state whenever images change
+  useEffect(() => {
+    if (images.length > 0) {
+      saveProjectState(images, selectedIndex);
+    }
+  }, [images, selectedIndex]);
 
   const handleAddImage = useCallback((file: File) => {
     const reader = new FileReader();
@@ -68,14 +76,8 @@ const App: React.FC = () => {
   }, [images, selectedIndex, updateImage]);
 
   const handlePrint = () => {
-    const newJob: PrintJob = {
-      id: Date.now().toString(),
-      timestamp: Date.now(),
-      imagesCount: images.length,
-    };
-    const updatedHistory = [newJob, ...history];
-    setHistory(updatedHistory);
-    localStorage.setItem('locket_history', JSON.stringify(updatedHistory));
+    const newJob = saveProjectState(images, selectedIndex);
+    setHistory(prev => [newJob, ...prev]);
     window.print();
     setIsPrintModalOpen(false);
   };
@@ -87,6 +89,15 @@ const App: React.FC = () => {
       return next;
     });
   };
+
+  const restoreProject = useCallback((jobId: string) => {
+    const projectState = restoreProjectState(jobId);
+    if (projectState) {
+      setImages(projectState.images);
+      setSelectedIndex(projectState.selectedIndex);
+      setShowHistory(false);
+    }
+  }, []);
 
   const selectedImage = images[selectedIndex];
   const printPortalNode = document.getElementById('print-area');
@@ -122,7 +133,7 @@ const App: React.FC = () => {
 
       <main className="flex flex-1 overflow-hidden relative">
         {showHistory ? (
-          <HistoryPanel history={history} />
+          <HistoryPanel history={history} onRestoreProject={restoreProject} />
         ) : (
           <>
             <Sidebar 
