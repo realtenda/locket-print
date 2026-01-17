@@ -23,4 +23,16 @@ export interface PrintJob {
   id: string;
   timestamp: number;
   imagesCount: number;
+  projectState?: ProjectState; // Store the full project state for restoration
+}
+
+export interface ProjectState {
+  images: LocketImage[];
+  selectedIndex: number;
+}
+
+export interface EditHistory {
+  id: string;
+  timestamp: number;
+  projectState: ProjectState;
 }

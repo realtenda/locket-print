@@ -1,5 +1,8 @@
 import React, { memo } from 'react';
 import { CropShape, LocketImage } from '../types';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Slider } from './ui/slider';
 
 interface SidebarProps {
   images: LocketImage[];
@@ -59,12 +62,13 @@ const Sidebar: React.FC<SidebarProps> = memo(({
                 className={`group relative aspect-square rounded-lg overflow-hidden cursor-pointer ring-offset-2 ring-offset-zinc-950 transition-all ${selectedIndex === i ? 'ring-2 ring-rose-500 scale-105' : 'ring-1 ring-zinc-800 hover:ring-zinc-600'}`}
               >
                 <img src={img.url} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
-                <button 
+                <Button
                   onClick={(e) => { e.stopPropagation(); onRemove(i); }}
-                  className="absolute top-1 right-1 w-5 h-5 bg-black/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 hover:bg-rose-600 rounded-md flex items-center justify-center text-white text-[8px] transition-all"
+                  variant="ghost"
+                  className="absolute top-1 right-1 w-5 h-5 bg-black/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 hover:bg-rose-600 rounded-md flex items-center justify-center text-white text-[8px] p-0"
                 >
                   ✕
-                </button>
+                </Button>
               </div>
             ))}
             {images.length < 12 && (
@@ -82,47 +86,49 @@ const Sidebar: React.FC<SidebarProps> = memo(({
             <section className="p-4 bg-zinc-900/30 rounded-2xl border border-zinc-900 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-[10px] font-extrabold uppercase tracking-[0.3em] text-rose-500">1. Locket Frame</h3>
-                <button 
+                <Button
                   onClick={() => onUpdate({ ...selected, lockAspectRatio: !selected.lockAspectRatio })}
-                  className={`p-1.5 rounded-md border transition-all ${selected.lockAspectRatio ? 'border-rose-500/50 text-rose-500 bg-rose-500/10' : 'border-zinc-800 text-zinc-600 hover:text-zinc-400'}`}
+                  variant={selected.lockAspectRatio ? 'default' : 'outline'}
+                  className={`p-1.5 rounded-md ${selected.lockAspectRatio ? 'border-rose-500/50 text-rose-500 bg-rose-500/10' : 'border-zinc-800 text-zinc-600 hover:text-zinc-400'}`}
                   title="Lock Aspect Ratio"
                 >
                   <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M17 7h-4v2h4c1.65 0 3 1.35 3 3s-1.35 3-3 3h-4v2h4c2.76 0 5-2.24 5-5s-2.24-5-5-5zm-6 8H7c-1.65 0-3-1.35-3-3s1.35-3 3-3h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-2zm-3-4h8v2H8z"/></svg>
-                </button>
+                </Button>
               </div>
               
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <label className="text-[8px] font-black text-zinc-600 uppercase tracking-widest pl-1">Width (cm)</label>
-                  <input 
+                  <Input
                     type="number" 
                     step="0.1"
                     value={selected.widthCm}
                     onChange={(e) => handleWidthChange(e.target.value)}
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:border-rose-500 transition-all font-mono"
+                    className="text-xs font-mono"
                   />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[8px] font-black text-zinc-600 uppercase tracking-widest pl-1">Height (cm)</label>
-                  <input 
+                  <Input
                     type="number" 
                     step="0.1"
                     value={selected.heightCm}
                     onChange={(e) => handleHeightChange(e.target.value)}
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:border-rose-500 transition-all font-mono"
+                    className="text-xs font-mono"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-2 pt-2">
                 {Object.values(CropShape).map((shape) => (
-                  <button
+                  <Button
                     key={shape}
                     onClick={() => onUpdate({...selected, shape})}
-                    className={`px-2 py-2 text-[9px] font-bold rounded-lg border transition-all ${selected.shape === shape ? 'bg-rose-500 border-rose-500 text-white shadow-lg' : 'bg-zinc-800/40 border-zinc-800 text-zinc-500 hover:border-zinc-700'}`}
+                    variant={selected.shape === shape ? 'default' : 'outline'}
+                    className={`px-2 py-2 text-[9px] font-bold ${selected.shape === shape ? 'bg-rose-500 border-rose-500 text-white shadow-lg' : ''}`}
                   >
                     {shape}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </section>
@@ -132,9 +138,13 @@ const Sidebar: React.FC<SidebarProps> = memo(({
               <div className="flex items-center justify-between">
                 <h3 className="text-[10px] font-extrabold uppercase tracking-[0.3em] text-zinc-400">2. Photo Content</h3>
                 {selectedIndex > 0 && (
-                  <button onClick={onInherit} className="text-[8px] text-rose-500 hover:text-rose-400 font-black uppercase tracking-widest border-b border-rose-500/20 pb-0.5 transition-all">
+                  <Button 
+                    onClick={onInherit} 
+                    variant="ghost"
+                    className="text-[8px] text-rose-500 hover:text-rose-400 font-black uppercase tracking-widest border-b border-rose-500/20 pb-0.5 h-auto p-0"
+                  >
                     Match First Photo
-                  </button>
+                  </Button>
                 )}
               </div>
               
@@ -144,14 +154,13 @@ const Sidebar: React.FC<SidebarProps> = memo(({
                     <label className="text-[9px] font-bold text-zinc-600 uppercase tracking-wider">Photo Scale</label>
                     <span className="text-[10px] font-mono font-bold text-rose-500">{Math.round(selected.zoom * 100)}%</span>
                   </div>
-                  <input 
-                    type="range" 
-                    min="0.1" 
-                    max="5" 
-                    step="0.01" 
-                    value={selected.zoom}
-                    onChange={(e) => onUpdate({...selected, zoom: parseFloat(e.target.value)})}
-                    className="w-full accent-rose-500 h-1 bg-zinc-900 rounded-full appearance-none cursor-pointer"
+                  <Slider
+                    min={0.1}
+                    max={5}
+                    step={0.01}
+                    value={[selected.zoom]}
+                    onValueChange={(value) => onUpdate({...selected, zoom: value[0]})}
+                    className="w-full"
                   />
                 </div>
 
@@ -160,14 +169,13 @@ const Sidebar: React.FC<SidebarProps> = memo(({
                     <label className="text-[9px] font-bold text-zinc-600 uppercase tracking-wider">Photo Rotation</label>
                     <span className="text-[10px] font-mono font-bold text-rose-500">{selected.rotation}°</span>
                   </div>
-                  <input 
-                    type="range" 
-                    min="-180" 
-                    max="180" 
-                    step="1" 
-                    value={selected.rotation}
-                    onChange={(e) => onUpdate({...selected, rotation: parseFloat(e.target.value)})}
-                    className="w-full accent-rose-500 h-1 bg-zinc-900 rounded-full appearance-none cursor-pointer"
+                  <Slider
+                    min={-180}
+                    max={180}
+                    step={1}
+                    value={[selected.rotation]}
+                    onValueChange={(value) => onUpdate({...selected, rotation: value[0]})}
+                    className="w-full"
                   />
                 </div>
               </div>
@@ -175,11 +183,11 @@ const Sidebar: React.FC<SidebarProps> = memo(({
               <div className="grid grid-cols-2 gap-3 pt-2">
                  <div className="space-y-1">
                     <label className="text-[8px] font-bold text-zinc-700 uppercase pl-1">H-Pos</label>
-                    <input type="number" value={Math.round(selected.offsetX)} onChange={(e) => onUpdate({...selected, offsetX: parseFloat(e.target.value) || 0})} className="w-full bg-zinc-900 border border-zinc-800/50 rounded-lg px-2 py-1.5 text-[10px] text-zinc-500 focus:outline-none" />
+                    <Input type="number" value={Math.round(selected.offsetX)} onChange={(e) => onUpdate({...selected, offsetX: parseFloat(e.target.value) || 0})} />
                  </div>
                  <div className="space-y-1">
                     <label className="text-[8px] font-bold text-zinc-700 uppercase pl-1">V-Pos</label>
-                    <input type="number" value={Math.round(selected.offsetY)} onChange={(e) => onUpdate({...selected, offsetY: parseFloat(e.target.value) || 0})} className="w-full bg-zinc-900 border border-zinc-800/50 rounded-lg px-2 py-1.5 text-[10px] text-zinc-500 focus:outline-none" />
+                    <Input type="number" value={Math.round(selected.offsetY)} onChange={(e) => onUpdate({...selected, offsetY: parseFloat(e.target.value) || 0})} />
                  </div>
               </div>
             </section>

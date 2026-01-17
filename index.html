@@ -20,6 +20,28 @@
         }
     </script>
     <style>
+        :root {
+            --background: 240 10% 3.9%;
+            --foreground: 0 0% 98%;
+            --card: 240 10% 9.8%;
+            --card-foreground: 0 0% 98%;
+            --popover: 240 10% 9.8%;
+            --popover-foreground: 0 0% 98%;
+            --muted: 240 3.7% 15.9%;
+            --muted-foreground: 240 5% 64.9%;
+            --accent: 0 72.2% 50.6%;
+            --accent-foreground: 240 10% 3.9%;
+            --destructive: 0 84.2% 60.2%;
+            --destructive-foreground: 240 10% 3.9%;
+            --border: 240 3.7% 15.9%;
+            --input: 240 3.7% 15.9%;
+            --primary: 0 72.2% 50.6%;
+            --primary-foreground: 240 10% 3.9%;
+            --secondary: 240 3.7% 15.9%;
+            --secondary-foreground: 0 0% 98%;
+            --ring: 0 72.2% 50.6%;
+        }
+        
         body {
             font-family: 'Inter', sans-serif;
             -webkit-font-smoothing: antialiased;
@@ -93,22 +115,49 @@
             background: #27272a;
             border-radius: 10px;
         }
+
+        /* shadcn/ui Component Styling */
+        input[type="number"],
+        input[type="text"] {
+            background-color: hsl(var(--card));
+            border-color: hsl(var(--border));
+            color: hsl(var(--foreground));
+        }
+
+        input[type="number"]:focus,
+        input[type="text"]:focus {
+            border-color: hsl(var(--primary));
+        }
+
+        /* Slider styling */
+        [role="slider"] {
+            accent-color: hsl(var(--primary));
+        }
+
+        /* Radix Slider Track */
+        [role="slider"] ~ * {
+            background-color: hsl(var(--input));
+        }
+
+        /* Button styling enhancement */
+        button {
+            transition-colors: 150ms;
+        }
+
+        /* Override default button colors for better visibility */
+        button[class*="bg-primary"] {
+            background-color: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+        }
+
+        button[class*="border-input"] {
+            border-color: hsl(var(--border));
+        }
         .editor-grid {
             background-image: radial-gradient(#27272a 1px, transparent 1px);
             background-size: 24px 24px;
         }
     </style>
-<script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@^19.2.3",
-    "react-dom": "https://esm.sh/react-dom@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "@google/genai": "https://esm.sh/@google/genai@^1.37.0"
-  }
-}
-</script>
 </head>
 <body class="bg-zinc-950 text-zinc-100 min-h-screen overflow-hidden">
     <!-- Global Scalable Shape Definitions -->
@@ -121,5 +170,6 @@
     </svg>
     <div id="root"></div>
     <div id="print-area"></div>
+    <script type="module" src="/index.tsx"></script>
 </body>
 </html>

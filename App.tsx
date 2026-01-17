@@ -5,6 +5,9 @@ import Sidebar from './components/Sidebar';
 import Editor from './components/Editor';
 import HistoryPanel from './components/HistoryPanel';
 import PrintPreview from './components/PrintPreview';
+import { saveProjectState, loadHistory, restoreProjectState } from './utils/storage';
+import { Button } from './components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle } from './components/ui/dialog';
 
 const App: React.FC = () => {
   const [images, setImages] = useState<LocketImage[]>([]);
@@ -14,11 +17,18 @@ const App: React.FC = () => {
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem('locket_history');
+    const saved = loadHistory();
     if (saved) {
-      setHistory(JSON.parse(saved));
+      setHistory(saved);
     }
   }, []);
+
+  // Auto-save project state whenever images change
+  useEffect(() => {
+    if (images.length > 0) {
+      saveProjectState(images, selectedIndex);
+    }
+  }, [images, selectedIndex]);
 
   const handleAddImage = useCallback((file: File) => {
     const reader = new FileReader();
@@ -31,7 +41,7 @@ const App: React.FC = () => {
         shape: CropShape.CIRCLE,
         widthCm: 2.5,
         heightCm: 2.5,
-        lockAspectRatio: true,
+        lockAspectRatio: false,
         zoom: 1.2, // Default slightly zoomed in for better initial crop
         rotation: 0,
         offsetX: 50,
@@ -68,14 +78,8 @@ const App: React.FC = () => {
   }, [images, selectedIndex, updateImage]);
 
   const handlePrint = () => {
-    const newJob: PrintJob = {
-      id: Date.now().toString(),
-      timestamp: Date.now(),
-      imagesCount: images.length,
-    };
-    const updatedHistory = [newJob, ...history];
-    setHistory(updatedHistory);
-    localStorage.setItem('locket_history', JSON.stringify(updatedHistory));
+    const newJob = saveProjectState(images, selectedIndex);
+    setHistory(prev => [newJob, ...prev]);
     window.print();
     setIsPrintModalOpen(false);
   };
@@ -87,6 +91,15 @@ const App: React.FC = () => {
       return next;
     });
   };
+
+  const restoreProject = useCallback((jobId: string) => {
+    const projectState = restoreProjectState(jobId);
+    if (projectState) {
+      setImages(projectState.images);
+      setSelectedIndex(projectState.selectedIndex);
+      setShowHistory(false);
+    }
+  }, []);
 
   const selectedImage = images[selectedIndex];
   const printPortalNode = document.getElementById('print-area');
@@ -105,24 +118,36 @@ const App: React.FC = () => {
         
         <div className="flex items-center gap-2">
           <nav className="flex bg-zinc-900/50 p-1 rounded-lg border border-zinc-800/50 mr-4">
-            <button onClick={() => setShowHistory(false)} className={`px-3 py-1.5 text-[10px] uppercase tracking-widest font-bold rounded-md transition-all ${!showHistory ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}>Editor</button>
-            <button onClick={() => setShowHistory(true)} className={`px-3 py-1.5 text-[10px] uppercase tracking-widest font-bold rounded-md transition-all ${showHistory ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}>History</button>
+            <Button 
+              onClick={() => setShowHistory(false)} 
+              variant={!showHistory ? 'default' : 'ghost'}
+              className={`px-3 py-1.5 text-[10px] uppercase tracking-widest font-bold ${!showHistory ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
+            >
+              Editor
+            </Button>
+            <Button 
+              onClick={() => setShowHistory(true)}
+              variant={showHistory ? 'default' : 'ghost'}
+              className={`px-3 py-1.5 text-[10px] uppercase tracking-widest font-bold ${showHistory ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
+            >
+              History
+            </Button>
           </nav>
 
-          <button 
+          <Button 
             onClick={() => setIsPrintModalOpen(true)}
             disabled={images.length === 0}
-            className="bg-rose-600 hover:bg-rose-500 disabled:opacity-30 disabled:grayscale px-5 py-2 rounded-lg text-[10px] uppercase tracking-widest font-extrabold text-white shadow-lg shadow-rose-900/20 transition-all active:scale-95 flex items-center gap-2"
+            className="bg-rose-600 hover:bg-rose-500 disabled:opacity-30 disabled:grayscale"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
             Review Sheet
-          </button>
+          </Button>
         </div>
       </header>
 
       <main className="flex flex-1 overflow-hidden relative">
         {showHistory ? (
-          <HistoryPanel history={history} />
+          <HistoryPanel history={history} onRestoreProject={restoreProject} />
         ) : (
           <>
             <Sidebar 
@@ -170,11 +195,11 @@ const App: React.FC = () => {
               </div>
             </div>
             <div className="flex gap-3 w-full sm:w-auto">
-              <button onClick={() => setIsPrintModalOpen(false)} className="flex-1 sm:flex-none px-6 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-[10px] uppercase font-black tracking-widest transition-all">Exit</button>
-              <button onClick={handlePrint} className="flex-1 sm:flex-none px-10 py-3 bg-rose-600 hover:bg-rose-500 rounded-xl text-[10px] uppercase font-black tracking-widest shadow-xl shadow-rose-900/40 transition-all flex items-center justify-center gap-2">
+              <Button onClick={() => setIsPrintModalOpen(false)} variant="outline" className="flex-1 sm:flex-none">Exit</Button>
+              <Button onClick={handlePrint} className="flex-1 sm:flex-none bg-rose-600 hover:bg-rose-500 flex items-center justify-center gap-2">
                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                  Start Print
-              </button>
+              </Button>
             </div>
           </div>
           

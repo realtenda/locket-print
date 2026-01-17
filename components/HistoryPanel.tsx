@@ -3,9 +3,10 @@ import { PrintJob } from '../types';
 
 interface HistoryPanelProps {
   history: PrintJob[];
+  onRestoreProject: (jobId: string) => void;
 }
 
-const HistoryPanel: React.FC<HistoryPanelProps> = ({ history }) => {
+const HistoryPanel: React.FC<HistoryPanelProps> = ({ history, onRestoreProject }) => {
   return (
     <div className="flex-1 overflow-y-auto p-12 bg-[#0c0c0e]">
       <div className="max-w-3xl mx-auto">
@@ -31,7 +32,8 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ history }) => {
             {history.map((job) => (
               <div 
                 key={job.id} 
-                className="group bg-zinc-900/40 border border-zinc-800/80 p-6 rounded-2xl flex items-center justify-between hover:bg-zinc-900 hover:border-zinc-700 transition-all cursor-default"
+                onClick={() => job.projectState && onRestoreProject(job.id)}
+                className="group bg-zinc-900/40 border border-zinc-800/80 p-6 rounded-2xl flex items-center justify-between hover:bg-zinc-900 hover:border-zinc-700 transition-all cursor-pointer hover:shadow-lg hover:shadow-rose-500/10"
               >
                 <div className="flex items-center gap-5">
                   <div className="w-12 h-12 rounded-xl bg-zinc-950 flex flex-col items-center justify-center border border-zinc-800 group-hover:border-rose-500/30 transition-colors">

@@ -1,5 +1,6 @@
 import React, { useRef, useState, useCallback, useMemo } from 'react';
 import { LocketImage, CropShape } from '../types';
+import { Button } from './ui/button';
 
 interface EditorProps {
   image: LocketImage;
@@ -141,18 +142,19 @@ const Editor: React.FC<EditorProps> = ({ image, onUpdate }) => {
       
       <div className="mt-10 flex flex-col items-center gap-6">
         <div className="flex bg-zinc-900/90 p-1.5 rounded-2xl border border-zinc-800 shadow-2xl backdrop-blur-xl">
-          <button onClick={resetPhoto} className="px-5 py-3 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-xl transition-all flex items-center gap-2 group">
+          <Button onClick={resetPhoto} variant="ghost" className="px-5 py-3 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-xl flex items-center gap-2 group">
             <svg className="w-4 h-4 group-active:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
             <span className="text-[10px] font-black uppercase tracking-widest">Reset View</span>
-          </button>
+          </Button>
           <div className="w-px h-6 bg-zinc-800 self-center mx-2"></div>
-          <button 
+          <Button 
             onClick={() => onUpdate({...image, rotation: image.rotation + 90})}
-            className="p-3 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-xl transition-all"
+            variant="ghost"
+            className="p-3 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-xl"
             title="Rotate View"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-          </button>
+          </Button>
         </div>
 
         <div className="flex items-center gap-4 text-zinc-600 text-[10px] font-bold uppercase tracking-[0.2em]">
